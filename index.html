@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Islamic prayer times and daily hadith quotes in English, Arabic, and Bosnian"
+    />
+    <meta
+      name="keywords"
+      content="prayer times, hadith, Islamic, Islam, mosque, prayer schedule"
+    />
+    <meta name="theme-color" content="#1a7c5e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Prayer Times" />
+    <link rel="manifest" href="manifest.json" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='75' font-size='80' text-anchor='middle'>🕌</text></svg>"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%231a7c5e' width='180' height='180'/><text x='90' y='135' font-size='100' text-anchor='middle' fill='white'>🕌</text></svg>"
+    />
+    <title>Islamic Prayer Times & Daily Hadith</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1><i class="fas fa-mosque"></i> Islamic Prayer Times</h1>
+        <p class="date-display" id="dateDisplay"></p>
+      </div>
+    </header>
+
+    <!-- Location Section -->
+    <section class="location-section">
+      <div class="container">
+        <div class="location-input-group">
+          <input
+            type="text"
+            id="locationInput"
+            placeholder="Enter city name (e.g., Sarajevo, London, Cairo)"
+            class="location-input"
+          />
+          <button id="searchBtn" class="btn btn-primary">
+            <i class="fas fa-search"></i> Search
+          </button>
+          <button id="gpsBtn" class="btn btn-secondary">
+            <i class="fas fa-location-dot"></i> Use My Location
+          </button>
+        </div>
+        <div id="locationName" class="location-name"></div>
+      </div>
+    </section>
+
+    <!-- Prayer Times Section -->
+    <section class="prayer-times-section">
+      <div class="container">
+        <h2 class="section-title">Prayer Times Today</h2>
+        <div id="loadingSpinner" class="loading-spinner">
+          <i class="fas fa-spinner"></i> Loading prayer times...
+        </div>
+        <div id="prayerTimesContainer" class="prayer-times-grid">
+          <!-- Prayer times will be inserted here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Hadith Section -->
+    <section class="hadith-section">
+      <div class="container">
+        <h2 class="section-title">Daily Hadith</h2>
+        <div class="hadith-container">
+          <div class="hadith-card">
+            <div class="hadith-header">
+              <h3>English</h3>
+            </div>
+            <p id="hadithEnglish" class="hadith-text"></p>
+          </div>
+
+          <div class="hadith-card hadith-card-arabic">
+            <div class="hadith-header">
+              <h3>العربية (Arabic)</h3>
+            </div>
+            <p id="hadithArabic" class="hadith-text hadith-arabic"></p>
+          </div>
+
+          <div class="hadith-card">
+            <div class="hadith-header">
+              <h3>Bosanski (Bosnian)</h3>
+            </div>
+            <p id="hadithBosnian" class="hadith-text"></p>
+          </div>
+        </div>
+
+        <div class="hadith-controls">
+          <button id="prevHadithBtn" class="btn btn-small">
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <button id="nextHadithBtn" class="btn btn-small">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+          <button id="randomHadithBtn" class="btn btn-small btn-accent">
+            <i class="fas fa-dice"></i> Random
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Islamic Calendar Section -->
+    <section class="calendar-section">
+      <div class="container">
+        <h2 class="section-title">Islamic Calendar</h2>
+        <div id="islamicDateContainer" class="islamic-date-box">
+          <!-- Islamic date will be inserted here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>
+        &copy; 2026 Islamic Prayer Times App. Created for Muslims worldwide.
+      </p>
+      <p class="footer-note">
+        Prayer times are calculated based on your location. May Allah accept
+        from all of us.
+      </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="hadith-data.js"></script>
+    <script src="script.js"></script>
+    <script>
+      // Register Service Worker for offline support and caching
+      if ("serviceWorker" in navigator && APP_CONFIG.FEATURES.serviceWorker) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("sw.js")
+            .then(function (registration) {
+              console.log(
+                "Service Worker registered successfully:",
+                registration,
+              );
+            })
+            .catch(function (error) {
+              console.log("Service Worker registration failed:", error);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
