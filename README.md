@@ -1,53 +1,159 @@
-# Islamic Prayer Times & Daily Hadith App
+# 🕌 Islamic Prayer Times & Daily Hadith
 
-A beautiful, responsive web application that displays Islamic prayer times and daily hadith quotes in English, Arabic, and Bosnian.
+A modern, responsive web application that displays Islamic prayer times for any location, along with daily hadith quotes in English, Arabic, and Bosnian.
 
-## Features
+**Live Demo:** https://armin--nukic.github.io/Islamic-prayer-timetable/
 
-✨ **Prayer Times**
+---
 
-- Real-time prayer times calculation based on your location
-- Support for any location worldwide
-- Automatic highlighting of the next prayer
-- Countdown timer to next prayer
-- Prayer times in 24-hour format
+## ✨ Features
 
-📱 **Daily Hadith Quotes**
+✅ **Real-time Prayer Times** - Accurate prayer times based on user's location  
+✅ **Daily Hadith Quotes** - 30+ Islamic hadith quotes in 3 languages  
+✅ **Multi-Language Support** - English, Arabic (العربية), Bosnian (Bosanski)  
+✅ **Geolocation** - Auto-detect user location or search by city  
+✅ **Islamic Calendar** - Display current Hijri date  
+✅ **Next Prayer Countdown** - Highlights next prayer with time remaining  
+✅ **Fully Responsive** - Works perfectly on mobile, tablet, and desktop  
+✅ **Modern Design** - Beautiful gradient UI with smooth animations  
+✅ **Offline Support** - Service Worker for offline functionality  
+✅ **Progressive Web App** - Can be installed on your device
 
-- 30 authentic hadith quotes with translations
-- Available in three languages:
-  - English
-  - Arabic (العربية)
-  - Bosnian (Bosanski)
-- Navigate through hadith with Previous/Next buttons
-- Random hadith feature
-- Automatic daily hadith update at midnight
+---
 
-🕌 **Islamic Calendar**
+## 🚀 Live Deployment (GitHub Pages)
 
-- Hijri (Islamic) date display
-- Shows date in both English and Arabic
+This app is **already deployed and live** on GitHub Pages!
 
-🌍 **Location Features**
+Visit: **https://armin--nukic.github.io/Islamic-prayer-timetable/**
 
-- Search for prayer times by city name
-- Auto-detect location using GPS
-- Reverse geocoding to show city name
-- Support for any city worldwide
+The site is automatically updated whenever changes are pushed to the `main` branch.
 
-🎨 **Beautiful Design**
+---
 
-- Responsive design that works on all devices
-- Islamic-inspired color scheme
-- Smooth animations and transitions
-- Professional UI/UX
+## 🛠 Technologies Used
 
-## Files Included
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+)
+- **APIs:**
+  - [Aladhan Prayer Times API](https://aladhan.com) - Free prayer times (no API key needed)
+  - [OpenStreetMap Nominatim](https://nominatim.org) - Free geocoding service
+- **Fonts:** Google Fonts (Cairo for Arabic, Poppins for English)
+- **Icons:** Font Awesome 6.4
+- **PWA:** Service Workers, Web App Manifest
 
-- **index.html** - Main HTML structure
-- **style.css** - Complete styling and responsive design
-- **script.js** - Main application logic and functionality
-- **hadith-data.js** - Hadith database with multilingual content
+---
+
+## 📁 Project Structure
+
+```
+Islamic-prayer-timetable/
+├── index.html           # Main HTML file
+├── style.css            # Modern CSS styling
+├── script.js            # Core JavaScript logic
+├── config.js            # Configuration settings
+├── hadith-data.js       # Database of 30+ hadith quotes
+├── manifest.json        # PWA manifest for app installation
+├── sw.js                # Service Worker for offline support
+├── .nojekyll            # GitHub Pages configuration
+├── README.md            # This file
+└── LICENSE              # MIT License
+```
+
+---
+
+## 🎯 How It Works
+
+### Prayer Times
+
+1. User opens the app or is automatically located via geolocation
+2. App fetches prayer times from **Aladhan API** (method 4)
+3. Prayer times are displayed in a beautiful grid layout
+4. Next prayer is highlighted with a countdown timer
+5. User can search for different cities
+
+### Hadith Quotes
+
+- 30 authentic Islamic hadith quotes in database
+- Daily hadith automatically changes at midnight
+- Users can navigate with Previous/Next/Random buttons
+- Available in English, Arabic, and Bosnian
+
+---
+
+## 📖 How to Use
+
+### On the Web
+
+1. Visit https://armin--nukic.github.io/Islamic-prayer-timetable/
+2. Allow location access (or enter your city manually)
+3. View prayer times and daily hadith
+4. Navigate through hadith with buttons
+
+### Local Development
+
+#### Clone the Repository
+
+```bash
+git clone https://github.com/armin--nukic/Islamic-prayer-timetable.git
+cd Islamic-prayer-timetable
+```
+
+#### Run Locally
+
+```bash
+# Python 3
+python -m http.server 8000
+
+# Or Python 2
+python -m SimpleHTTPServer 8000
+```
+
+Then open: **http://localhost:8000**
+
+---
+
+## 🔧 Configuration
+
+Edit `config.js` to customize settings like:
+
+- Default location
+- Prayer calculation method
+- Language preferences
+- Color scheme
+
+---
+
+## 🌐 APIs Used (Both Free & No API Key Required)
+
+### Aladhan Prayer Times API
+
+- ✅ Free
+- ✅ No API key needed
+- ✅ CORS enabled
+- ✅ Worldwide coverage
+
+### OpenStreetMap Nominatim Geocoding
+
+- ✅ Free
+- ✅ No API key needed
+- ✅ CORS enabled
+
+---
+
+## 📱 Responsive Design
+
+- **Desktop (1200px+):** Full layout
+- **Tablet (768px):** Optimized for touch
+- **Mobile (480px):** Vertical layout
+
+---
+
+## ✅ Security & Privacy
+
+- 🔒 No personal data is stored
+- 🔒 All API calls are HTTPS
+- 🔒 No analytics or tracking
+- 🔒 Open source (MIT License)
 - **README.md** - This documentation file
 
 ## How to Use
