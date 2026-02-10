@@ -165,7 +165,7 @@ function fetchPrayerTimes(latitude, longitude) {
   fetch(url, {
     method: "GET",
     headers: {
-      "Accept": "application/json",
+      Accept: "application/json",
     },
   })
     .then((response) => {
@@ -189,9 +189,7 @@ function fetchPrayerTimes(latitude, longitude) {
         displayIslamicDate(currentIslamicDate);
         showLoading(false);
       } else {
-        throw new Error(
-          `API returned error code: ${data.code} - ${data.data}`,
-        );
+        throw new Error(`API returned error code: ${data.code} - ${data.data}`);
       }
     })
     .catch((error) => {
@@ -426,9 +424,7 @@ function attemptGeolocation() {
   // Try to get location automatically
   if (navigator.geolocation) {
     const geolocationTimeout = setTimeout(() => {
-      console.log(
-        "[Geolocation] Timeout - using default location (Sarajevo)",
-      );
+      console.log("[Geolocation] Timeout - using default location (Sarajevo)");
       fetchPrayerTimes(43.9159, 18.4131); // Sarajevo coordinates
       document.getElementById("locationName").textContent =
         "📍 Sarajevo (Default)";
