@@ -19,6 +19,71 @@
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
+body.dark-mode {
+  --primary: #1a5f4a;
+  --primary-light: #2d9d7a;
+  --accent: #d4af37;
+  --accent-light: #3a2e0a;
+  --dark: #10151a;
+  --light: #181c1f;
+  --text-dark: #f8f9fa;
+  --text-light: #b0b0b0;
+  --border: #22272b;
+  background: var(--light) !important;
+  color: var(--text-dark) !important;
+}
+
+body.dark-mode .header,
+body.dark-mode .footer {
+  background: var(--dark) !important;
+  color: var(--text-dark) !important;
+}
+body.dark-mode .container,
+body.dark-mode .location-section,
+body.dark-mode .prayer-card,
+body.dark-mode .hadith-card,
+body.dark-mode .calendar-section,
+body.dark-mode .islamic-date-box {
+  background: #181c1f !important;
+  color: var(--text-dark) !important;
+  box-shadow: none;
+}
+body.dark-mode .prayer-card.active {
+  background: linear-gradient(135deg, #223c2e 0%, #2d9d7a 100%) !important;
+  color: #fff !important;
+}
+body.dark-mode .btn,
+body.dark-mode .btn-primary,
+body.dark-mode .btn-secondary,
+body.dark-mode .btn-accent {
+  color: #fff !important;
+  background: #22272b !important;
+  border: 1px solid #333 !important;
+}
+body.dark-mode .btn-accent {
+  background: var(--accent) !important;
+  color: #181c1f !important;
+}
+body.dark-mode .section-title {
+  color: var(--accent) !important;
+}
+body.dark-mode .prayer-arabic,
+body.dark-mode .hadith-arabic {
+  color: #e6d8b8 !important;
+}
+body.dark-mode .prayer-card.active .prayer-arabic {
+  color: #ffe7b3 !important;
+}
+body.dark-mode .loading-spinner {
+  color: #b0b0b0 !important;
+}
+body.dark-mode .error {
+  background: #2d1a1a !important;
+  color: #ffb3b3 !important;
+
+  border-left: 4px solid #c33 !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
