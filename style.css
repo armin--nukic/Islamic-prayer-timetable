@@ -391,6 +391,19 @@ body {
   margin-top: 3px;
 }
 
+/* Sunrise (Zora) - Orange color like Fajr */
+#prayer-sunrise {
+  background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%) !important;
+}
+#prayer-sunrise .prayer-name,
+#prayer-sunrise .prayer-time,
+#prayer-sunrise .prayer-arabic {
+  color: white !important;
+}
+#prayer-sunrise .prayer-bosnian {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
 .prayer-card.active .prayer-name {
   color: var(--accent);
 }

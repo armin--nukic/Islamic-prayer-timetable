@@ -43,7 +43,7 @@ function initializeApp() {
   console.log("Loading prayer times for Sarajevo...");
   currentLocation = "Sarajevo (Default)";
   document.getElementById("locationName").innerHTML =
-    "<i class='fas fa-location-dot'></i> Sarajevo (Default)";
+    "<i class='fas fa-location-dot'></i> Sarajevo";
   fetchPrayerTimes(43.9159, 18.4131, "Sarajevo");
 
   // Then try to get user's actual location
@@ -634,4 +634,3 @@ document.addEventListener("keydown", function (event) {
 });
 
 console.log("Script loaded successfully!");
-
