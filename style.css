@@ -307,10 +307,12 @@ body {
 }
 
 .prayer-arabic {
-  font-family: "Cairo", sans-serif;
-  font-size: 0.9rem;
+  font-family: "Noto Sans Arabic", "Cairo", sans-serif;
+  font-size: 1.05rem;
   color: var(--text-light);
   margin-top: 8px;
+  direction: rtl;
+  letter-spacing: 0.01em;
 }
 
 .prayer-card.active .prayer-arabic {
@@ -416,8 +418,10 @@ body {
 }
 
 .hadith-card-arabic .hadith-text {
-  font-family: "Cairo", sans-serif;
-  font-size: 1rem;
+  font-family: "Noto Sans Arabic", "Cairo", sans-serif;
+  font-size: 1.1rem;
+  direction: rtl;
+  letter-spacing: 0.01em;
 }
 
 .hadith-controls {
