@@ -342,7 +342,7 @@ function displayPrayerTimes(timings) {
 }
 
 // ==========================================
-// HIGHLIGHT NEXT PRAYER
+// HIGHIGHT NEXT PRAYER
 // ==========================================
 
 function updatePrayerHighlight() {
