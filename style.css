@@ -379,6 +379,16 @@ body {
   font-size: 0.95rem;
   margin-bottom: 8px;
   color: var(--primary);
+  line-height: 1.3;
+}
+
+.prayer-bosnian {
+  font-weight: 500;
+  font-size: 0.8rem;
+  opacity: 0.85;
+  color: var(--text-light);
+  display: block;
+  margin-top: 3px;
 }
 
 .prayer-card.active .prayer-name {
