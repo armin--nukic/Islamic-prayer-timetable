@@ -1,20 +1,20 @@
 // Service Worker for offline support and caching
-const CACHE_NAME = "islamic-prayer-times-v1";
+const CACHE_NAME = "islamic-prayer-times-v3";
 const URLS_TO_CACHE = [
-  "/",
-  "/index.html",
-  "/style.css",
-  "/script.js",
-  "/hadith-data.js",
-  "/README.md",
+  "./",
+  "./index.html",
+  "./style.css",
+  "./script.js",
+  "./config.js",
+  "./hadith-data.js",
+  "./manifest.json",
+  "./assets/logo.svg",
 ];
 
 // Install event - cache files
 self.addEventListener("install", function (event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function (cache) {
-      return cache.addAll(URLS_TO_CACHE);
-    }),
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(URLS_TO_CACHE)),
   );
 });
 

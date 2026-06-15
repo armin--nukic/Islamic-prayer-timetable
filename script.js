@@ -1,518 +1,496 @@
-// ==========================================
-// ISLAMIC PRAYER TIMES & HADITH APP
-// ==========================================
-
-// Global variables
-let currentLocation = null;
 let currentPrayerTimes = null;
 let currentIslamicDate = null;
+let currentGregorianDate = null;
 let currentHadithIndex = 0;
-let currentCoordinates = null;
+let currentLanguage = "en";
 
-// ==========================================
-// INITIALIZATION
-// ==========================================
+const i18n = {
+  en: {
+    appEyebrow: "English + Bosnian",
+    heroTitle: "Prayer times with a calm daily rhythm.",
+    heroText:
+      "Search any city, including Berlin, and get today's salah times, Hijri date, important Islamic days, and daily reminders.",
+    cityLabel: "City",
+    cityPlaceholder: "Berlin, Sarajevo, London...",
+    search: "Search",
+    gps: "Use my location",
+    today: "Today",
+    hijriToday: "Hijri today",
+    vaktijaEyebrow: "Today's Vaktija",
+    prayerTitle: "Prayer Times",
+    loading: "Loading prayer times...",
+    hijriEyebrow: "Hijri Calendar",
+    hijriTitle: "Islamic Date",
+    moonNote: "Dates can differ by moon sighting and local authority.",
+    daysEyebrow: "Important Days",
+    daysTitle: "Islamic Calendar Highlights",
+    reminderEyebrow: "Daily Reminder",
+    reminderTitle: "Hadith and Quran",
+    footerNote: "Prayer times are calculated by location. May Allah accept from us and from you.",
+    next: "Next",
+    nextIn: "Next in",
+    approx: "Approx.",
+    afterLoad: "After prayer times load",
+    enterCity: "Please enter a city name, for example Berlin.",
+    geoUnsupported: "Geolocation is not supported by this browser.",
+    geoFailed: "Location permission was not available. Please search by city.",
+    cityFailed: "City search failed.",
+    notFound: "Location not found. Try another city name.",
+    prayerFailed: "Prayer time service is not available.",
+    invalidPrayer: "Invalid prayer time response.",
+  },
+  bs: {
+    appEyebrow: "Engleski + Bosanski",
+    heroTitle: "Vaktija s mirnim dnevnim ritmom.",
+    heroText:
+      "Pretra\u017ei bilo koji grad, uklju\u010duju\u0107i Berlin, i dobij dana\u0161nja vremena namaza, hid\u017eretski datum, va\u017ene islamske dane i dnevne podsjetnike.",
+    cityLabel: "Grad",
+    cityPlaceholder: "Berlin, Sarajevo, London...",
+    search: "Pretra\u017ei",
+    gps: "Koristi moju lokaciju",
+    today: "Danas",
+    hijriToday: "Hid\u017eretski danas",
+    vaktijaEyebrow: "Dana\u0161nja vaktija",
+    prayerTitle: "Vremena namaza",
+    loading: "U\u010ditavam vremena namaza...",
+    hijriEyebrow: "Hid\u017eretski kalendar",
+    hijriTitle: "Islamski datum",
+    moonNote: "Datumi se mogu razlikovati prema vi\u0111enju mla\u0111aka i lokalnoj zajednici.",
+    daysEyebrow: "Va\u017eni dani",
+    daysTitle: "Istaknuti dani islamskog kalendara",
+    reminderEyebrow: "Dnevni podsjetnik",
+    reminderTitle: "Hadis i Kur'an",
+    footerNote: "Vremena namaza se ra\u010dunaju prema lokaciji. Neka Allah primi od nas i od vas.",
+    next: "Sljede\u0107i",
+    nextIn: "Sljede\u0107i za",
+    approx: "Oko",
+    afterLoad: "Nakon u\u010ditavanja vaktije",
+    enterCity: "Unesi naziv grada, naprimjer Berlin.",
+    geoUnsupported: "Geolokacija nije podr\u017eana u ovom browseru.",
+    geoFailed: "Lokacija nije dostupna. Pretra\u017ei grad ru\u010dno.",
+    cityFailed: "Pretraga grada nije uspjela.",
+    notFound: "Lokacija nije prona\u0111ena. Poku\u0161aj drugi grad.",
+    prayerFailed: "Servis za vremena namaza trenutno nije dostupan.",
+    invalidPrayer: "Neispravan odgovor servisa za vaktiju.",
+  },
+};
 
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("=== APP STARTING ===");
-  initializeApp();
-  // Dark mode toggle
-  const darkBtn = document.getElementById("toggleDarkMode");
-  if (darkBtn) {
-    // Set initial mode from localStorage
-    if (localStorage.getItem("darkMode") === "true") {
-      document.body.classList.add("dark-mode");
-      darkBtn.textContent = "☀️ Light Mode";
-    }
-    darkBtn.addEventListener("click", function () {
-      document.body.classList.toggle("dark-mode");
-      const isDark = document.body.classList.contains("dark-mode");
-      localStorage.setItem("darkMode", isDark);
-      darkBtn.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-    });
-  }
-});
+const prayerItems = [
+  { apiKey: "Fajr", en: "Fajr", bs: "Sabah", ar: "\u0627\u0644\u0641\u062c\u0631", icon: "fa-sun" },
+  { apiKey: "Sunrise", en: "Sunrise", bs: "Izlazak sunca", ar: "\u0627\u0644\u0634\u0631\u0648\u0642", icon: "fa-cloud-sun" },
+  { apiKey: "Dhuhr", en: "Dhuhr", bs: "Podne", ar: "\u0627\u0644\u0638\u0647\u0631", icon: "fa-sun" },
+  { apiKey: "Asr", en: "Asr", bs: "Ikindija", ar: "\u0627\u0644\u0639\u0635\u0631", icon: "fa-cloud" },
+  { apiKey: "Maghrib", en: "Maghrib", bs: "Ak\u0161am", ar: "\u0627\u0644\u0645\u063a\u0631\u0628", icon: "fa-moon" },
+  { apiKey: "Isha", en: "Isha", bs: "Jacija", ar: "\u0627\u0644\u0639\u0634\u0627\u0621", icon: "fa-star" },
+];
 
-function initializeApp() {
-  console.log("=== APP INITIALIZING ===");
+const islamicMonths = [
+  { en: "Muharram", bs: "Muharrem", ar: "\u0645\u062d\u0631\u0645" },
+  { en: "Safar", bs: "Safer", ar: "\u0635\u0641\u0631" },
+  { en: "Rabi' al-Awwal", bs: "Rebiul-evvel", ar: "\u0631\u0628\u064a\u0639 \u0627\u0644\u0623\u0648\u0644" },
+  { en: "Rabi' al-Thani", bs: "Rebiul-ahir", ar: "\u0631\u0628\u064a\u0639 \u0627\u0644\u0622\u062e\u0631" },
+  { en: "Jumada al-Awwal", bs: "D\u017eumadel-ula", ar: "\u062c\u0645\u0627\u062f\u0649 \u0627\u0644\u0623\u0648\u0644\u0649" },
+  { en: "Jumada al-Thani", bs: "D\u017eumadel-uhra", ar: "\u062c\u0645\u0627\u062f\u0649 \u0627\u0644\u0622\u062e\u0631\u0629" },
+  { en: "Rajab", bs: "Red\u017eeb", ar: "\u0631\u062c\u0628" },
+  { en: "Sha'ban", bs: "\u0160a'ban", ar: "\u0634\u0639\u0628\u0627\u0646" },
+  { en: "Ramadan", bs: "Ramazan", ar: "\u0631\u0645\u0636\u0627\u0646" },
+  { en: "Shawwal", bs: "\u0160evval", ar: "\u0634\u0648\u0627\u0644" },
+  { en: "Dhu al-Qi'dah", bs: "Zul-ka'de", ar: "\u0630\u0648 \u0627\u0644\u0642\u0639\u062f\u0629" },
+  { en: "Dhu al-Hijjah", bs: "Zul-Hid\u017ed\u017ee", ar: "\u0630\u0648 \u0627\u0644\u062d\u062c\u0629" },
+];
+
+const importantDays = [
+  {
+    month: 1,
+    day: 1,
+    en: "Islamic New Year",
+    bs: "Hid\u017eretska nova godina",
+    noteEn: "The first day of Muharram and the beginning of a new Hijri year.",
+    noteBs: "Prvi dan Muharrema i po\u010detak nove hid\u017eretske godine.",
+  },
+  {
+    month: 1,
+    day: 10,
+    en: "Ashura",
+    bs: "A\u0161ura",
+    noteEn: "The 10th of Muharram, a day connected with fasting and remembrance.",
+    noteBs: "Deseti dan Muharrema, vezan za post i podsje\u0107anje.",
+  },
+  {
+    month: 9,
+    day: 1,
+    en: "Ramadan Begins",
+    bs: "Po\u010detak Ramazana",
+    noteEn: "The blessed month of fasting, Quran, prayer, and charity.",
+    noteBs: "Mubarek mjesec posta, Kur'ana, namaza i dobro\u010dinstva.",
+  },
+  {
+    month: 10,
+    day: 1,
+    en: "Eid al-Fitr",
+    bs: "Ramazanski bajram",
+    noteEn: "The Eid after Ramadan.",
+    noteBs: "Bajram nakon mjeseca Ramazana.",
+  },
+  {
+    month: 12,
+    day: 1,
+    en: "Dhu al-Hijjah Begins",
+    bs: "Po\u010detak Zul-Hid\u017ed\u017eeta",
+    noteEn: "The first ten days of Dhu al-Hijjah are among the most blessed days.",
+    noteBs: "Prvih deset dana Zul-Hid\u017ed\u017eeta spadaju me\u0111u najodabranije dane.",
+  },
+  {
+    month: 12,
+    day: 9,
+    en: "Day of Arafah",
+    bs: "Dan Arefata",
+    noteEn: "The 9th of Dhu al-Hijjah, a major day of dua and worship.",
+    noteBs: "Deveti dan Zul-Hid\u017ed\u017eeta, veliki dan dove i ibadeta.",
+  },
+  {
+    month: 12,
+    day: 10,
+    en: "Eid al-Adha",
+    bs: "Kurban-bajram",
+    noteEn: "The Eid of sacrifice during the Hajj season.",
+    noteBs: "Bajram kurbana u danima had\u017ea.",
+  },
+];
+
+const knownLocations = {
+  berlin: { name: "Berlin, Germany", latitude: 52.52, longitude: 13.405 },
+  sarajevo: { name: "Sarajevo, Bosnia and Herzegovina", latitude: 43.9159, longitude: 18.4131 },
+  london: { name: "London, United Kingdom", latitude: 51.5072, longitude: -0.1276 },
+  vienna: { name: "Vienna, Austria", latitude: 48.2082, longitude: 16.3738 },
+  wien: { name: "Vienna, Austria", latitude: 48.2082, longitude: 16.3738 },
+  zagreb: { name: "Zagreb, Croatia", latitude: 45.815, longitude: 15.9819 },
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupTheme();
+  setupEvents();
   displayCurrentDate();
   displayHadithOfDay();
-  setupEventListeners();
+  displayImportantDays();
+  applyLanguage(localStorage.getItem("language") || "en");
 
-  // Load prayer times immediately with default location
-  console.log("Loading prayer times for Sarajevo...");
-  currentLocation = "Sarajevo (Default)";
-  document.getElementById("locationName").innerHTML =
-    "<i class='fas fa-location-dot'></i> Sarajevo";
-  fetchPrayerTimes(43.9159, 18.4131, "Sarajevo");
+  const fallback = APP_CONFIG.DEFAULT_LOCATION;
+  setLocationName(`${fallback.name}, ${fallback.country}`);
+  fetchPrayerTimes(fallback.latitude, fallback.longitude);
 
-  // Then try to get user's actual location
-  attemptGeolocation();
+  setInterval(updatePrayerHighlight, 30000);
+});
 
-  // Update prayer times every minute
-  setInterval(updatePrayerHighlight, 60000);
+function setupTheme() {
+  const darkBtn = document.getElementById("toggleDarkMode");
+  const saved = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const shouldUseDark = saved ? saved === "dark" : prefersDark;
 
-  // Update hadith at midnight
-  setInterval(function () {
-    if (isNewDay()) {
-      displayHadithOfDay();
-    }
-  }, 60000);
+  document.body.classList.toggle("dark-mode", shouldUseDark);
+  updateThemeButton();
+
+  darkBtn?.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+    updateThemeButton();
+  });
 }
 
-// ==========================================
-// EVENT LISTENERS
-// ==========================================
-
-function setupEventListeners() {
-  const searchBtn = document.getElementById("searchBtn");
-  const gpsBtn = document.getElementById("gpsBtn");
-  const locationInput = document.getElementById("locationInput");
-  const nextHadithBtn = document.getElementById("nextHadithBtn");
-  const prevHadithBtn = document.getElementById("prevHadithBtn");
-  const randomHadithBtn = document.getElementById("randomHadithBtn");
-
-  if (searchBtn) searchBtn.addEventListener("click", handleLocationSearch);
-  if (gpsBtn) gpsBtn.addEventListener("click", handleGeolocation);
-  if (locationInput) {
-    locationInput.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        handleLocationSearch();
-      }
-    });
-  }
-
-  if (nextHadithBtn) nextHadithBtn.addEventListener("click", nextHadith);
-  if (prevHadithBtn) prevHadithBtn.addEventListener("click", previousHadith);
-  if (randomHadithBtn) randomHadithBtn.addEventListener("click", randomHadith);
+function updateThemeButton() {
+  const darkBtn = document.getElementById("toggleDarkMode");
+  if (!darkBtn) return;
+  const isDark = document.body.classList.contains("dark-mode");
+  darkBtn.innerHTML = `
+    <span class="theme-track" aria-hidden="true">
+      <span class="theme-thumb"><i class="fa-solid ${isDark ? "fa-sun" : "fa-moon"}"></i></span>
+    </span>
+    <span>${isDark ? "Light" : "Night"}</span>
+  `;
+  darkBtn.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to night mode");
 }
 
-// ==========================================
-// DATE & TIME FUNCTIONS
-// ==========================================
+function setupEvents() {
+  document.getElementById("locationForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleLocationSearch();
+  });
+  document.getElementById("gpsBtn")?.addEventListener("click", handleGeolocation);
+  document.getElementById("nextHadithBtn")?.addEventListener("click", nextHadith);
+  document.getElementById("prevHadithBtn")?.addEventListener("click", previousHadith);
+  document.getElementById("randomHadithBtn")?.addEventListener("click", randomHadith);
+  document.querySelectorAll("[data-lang]").forEach((button) => {
+    button.addEventListener("click", () => applyLanguage(button.dataset.lang));
+  });
+}
+
+function applyLanguage(language) {
+  currentLanguage = language === "bs" ? "bs" : "en";
+  localStorage.setItem("language", currentLanguage);
+  document.documentElement.lang = currentLanguage;
+
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    node.textContent = t(node.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+    node.setAttribute("placeholder", t(node.dataset.i18nPlaceholder));
+  });
+  document.querySelectorAll("[data-lang]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.lang === currentLanguage);
+    button.setAttribute("aria-pressed", String(button.dataset.lang === currentLanguage));
+  });
+
+  displayCurrentDate();
+  if (currentIslamicDate) displayIslamicDate(currentIslamicDate, currentGregorianDate);
+  if (currentPrayerTimes) displayPrayerTimes(currentPrayerTimes);
+  displayImportantDays(currentIslamicDate);
+}
 
 function displayCurrentDate() {
-  const dateOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
   const today = new Date();
-  const formattedDate = today.toLocaleDateString("en-US", dateOptions);
-  const dateDisplay = document.getElementById("dateDisplay");
-  if (dateDisplay) {
-    dateDisplay.textContent = formattedDate;
-  }
-  // Set today date in today-date-box
-  const todayGregorian = document.getElementById("todayGregorian");
-  if (todayGregorian) {
-    const shortDate = today.toLocaleDateString("en-GB");
-    todayGregorian.textContent = shortDate;
-  }
-}
+  const locale = currentLanguage === "bs" ? "bs-BA" : "en-GB";
+  const dateText = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(today);
 
-// ==========================================
-// LOCATION HANDLING
-// ==========================================
+  document.getElementById("todayGregorian").textContent = dateText;
+  document.getElementById("heroGregorianDate").textContent = dateText;
+}
 
 function handleLocationSearch() {
   const locationInput = document.getElementById("locationInput");
   const location = locationInput.value.trim();
-
   if (!location) {
-    showError("Please enter a city name");
+    showError(t("enterCity"));
     return;
   }
-
   geocodeLocation(location);
 }
 
 function handleGeolocation() {
-  if (navigator.geolocation) {
-    showLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        currentCoordinates = { latitude: lat, longitude: lng };
-        console.log("Got user location:", lat, lng);
-        fetchPrayerTimes(lat, lng);
-        reverseGeocode(lat, lng);
-      },
-      function (error) {
-        console.log("Geolocation error:", error);
-        showError("Unable to access your location. Please enter manually.");
-        showLoading(false);
-      },
-    );
-  } else {
-    showError("Geolocation is not supported by your browser");
+  if (!navigator.geolocation) {
+    showError(t("geoUnsupported"));
+    return;
   }
+
+  showLoading(true);
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+      fetchPrayerTimes(latitude, longitude);
+      reverseGeocode(latitude, longitude);
+    },
+    () => {
+      showLoading(false);
+      showError(t("geoFailed"));
+    },
+    { timeout: 9000, enableHighAccuracy: false },
+  );
 }
 
 function geocodeLocation(locationName) {
+  const known = knownLocations[locationName.toLowerCase()];
+  if (known) {
+    showLoading(true);
+    setLocationName(known.name);
+    document.getElementById("locationInput").value = "";
+    fetchPrayerTimes(known.latitude, known.longitude);
+    return;
+  }
+
   showLoading(true);
-  console.log("Geocoding location:", locationName);
+  const url = `${APP_CONFIG.APIS.geocoding}?q=${encodeURIComponent(locationName)}&format=json&limit=1&addressdetails=1`;
 
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationName)}&format=json&limit=1`;
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data && data.length > 0) {
-        const lat = data[0].lat;
-        const lng = data[0].lon;
-        const name = data[0].display_name.split(",")[0];
-
-        currentCoordinates = { latitude: lat, longitude: lng };
-        currentLocation = name;
-
-        console.log("Found location:", name, lat, lng);
-
-        document.getElementById("locationName").innerHTML =
-          `<i class='fas fa-location-dot'></i> ${name}`;
-        document.getElementById("locationInput").value = "";
-
-        fetchPrayerTimes(lat, lng, name);
-      } else {
-        showError("Location not found. Please try another search.");
-        showLoading(false);
-      }
-    })
-    .catch((error) => {
-      console.error("Geocoding error:", error);
-      showError("Error searching for location: " + error.message);
-      showLoading(false);
-    });
-}
-
-function reverseGeocode(lat, lng) {
-  console.log("Reverse geocoding:", lat, lng);
-  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data && data.address) {
-        const city =
-          data.address.city ||
-          data.address.town ||
-          data.address.village ||
-          "Unknown Location";
-        currentLocation = city;
-        console.log("Reverse geocoded to:", city);
-        document.getElementById("locationName").innerHTML =
-          `<i class='fas fa-location-dot'></i> ${city}`;
-      }
-    })
-    .catch((error) => console.error("Reverse geocoding error:", error));
-}
-
-// ==========================================
-// PRAYER TIMES API
-// ==========================================
-
-function fetchPrayerTimes(latitude, longitude, locationName = null) {
-  showLoading(true);
-
-  const url = `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=4`;
-
-  console.log("=== FETCHING PRAYER TIMES ===");
-  console.log("URL:", url);
-  console.log("Location:", locationName || "Unknown");
-
-  fetch(url)
+  fetch(url, { headers: { Accept: "application/json" } })
     .then((response) => {
-      console.log("Response status:", response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(t("cityFailed"));
       return response.json();
     })
     .then((data) => {
-      console.log("API Response:", data);
-
-      if (data && data.code === 200) {
-        currentPrayerTimes = data.data.timings;
-        currentIslamicDate = data.data.date.hijri;
-
-        console.log("Prayer Times Data:", currentPrayerTimes);
-        console.log("Islamic Date:", currentIslamicDate);
-
-        displayPrayerTimes(currentPrayerTimes);
-        displayIslamicDate(currentIslamicDate);
-        showLoading(false);
-      } else {
-        throw new Error("Invalid API response");
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error(t("notFound"));
       }
+      const result = data[0];
+      const displayName = formatPlaceName(result);
+      setLocationName(displayName);
+      document.getElementById("locationInput").value = "";
+      fetchPrayerTimes(result.lat, result.lon);
     })
     .catch((error) => {
-      console.error("Fetch error:", error);
-      showError("Error fetching prayer times: " + error.message);
       showLoading(false);
+      showError(error.message);
     });
 }
 
-// ==========================================
-// DISPLAY PRAYER TIMES
-// ==========================================
+function reverseGeocode(lat, lon) {
+  const url = `${APP_CONFIG.APIS.reverseGeocoding}?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => setLocationName(formatPlaceName(data)))
+    .catch(() => setLocationName("Current location"));
+}
+
+function fetchPrayerTimes(latitude, longitude) {
+  showLoading(true);
+  const method = APP_CONFIG.PRAYER_METHOD;
+  const school = APP_CONFIG.FIQH_METHOD;
+  const url = `${APP_CONFIG.APIS.prayerTimes}?latitude=${latitude}&longitude=${longitude}&method=${method}&school=${school}`;
+
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) throw new Error(t("prayerFailed"));
+      return response.json();
+    })
+    .then((data) => {
+      if (!data || data.code !== 200) throw new Error(t("invalidPrayer"));
+      currentPrayerTimes = data.data.timings;
+      currentIslamicDate = data.data.date.hijri;
+      currentGregorianDate = data.data.date.gregorian;
+      displayPrayerTimes(currentPrayerTimes);
+      displayIslamicDate(currentIslamicDate, currentGregorianDate);
+      displayImportantDays(currentIslamicDate);
+      showLoading(false);
+    })
+    .catch((error) => {
+      showLoading(false);
+      showError(error.message);
+    });
+}
 
 function displayPrayerTimes(timings) {
-  console.log("=== DISPLAYING PRAYER TIMES ===");
-  console.log("Timings object:", timings);
-
   const container = document.getElementById("prayerTimesContainer");
-  if (!container) {
-    console.error("Prayer times container not found!");
-    return;
-  }
-
   container.innerHTML = "";
 
-  // Prayer list with API keys and translations
-  const prayers = [
-    {
-      apiKey: "Fajr",
-      en: "Fajr",
-      ar: "الفجر",
-      bs: "Zora",
-    },
-    {
-      apiKey: "Sunrise",
-      en: "Sunrise",
-      ar: "الشروق",
-      bs: "Izlazak sunca",
-    },
-    {
-      apiKey: "Dhuhr",
-      en: "Dhuhr",
-      ar: "الظهر",
-      bs: "Podne",
-    },
-    {
-      apiKey: "Asr",
-      en: "Asr",
-      ar: "العصر",
-      bs: "Ikindija",
-    },
-    {
-      apiKey: "Maghrib",
-      en: "Maghrib",
-      ar: "المغرب",
-      bs: "Aksam",
-    },
-    {
-      apiKey: "Isha",
-      en: "Isha",
-      ar: "العشاء",
-      bs: "Jacija",
-    },
-  ];
-
-  let prayerCount = 0;
-
-  prayers.forEach((prayer) => {
-    const time = timings[prayer.apiKey];
-
-    if (time) {
-      prayerCount++;
-      console.log(`Creating card for ${prayer.apiKey}: ${time}`);
-
-      const card = document.createElement("div");
-      card.className = "prayer-card";
-      card.id = `prayer-${prayer.apiKey.toLowerCase()}`;
-
-      card.innerHTML = `
-        <div class="prayer-name">${prayer.en}<br><span class="prayer-bosnian">(${prayer.bs})</span></div>
-        <div class="prayer-time">${time}</div>
-        <div class="prayer-arabic">${prayer.ar}</div>
-      `;
-
-      container.appendChild(card);
-    } else {
-      console.warn(`No time found for ${prayer.apiKey}`);
-    }
+  prayerItems.forEach((prayer) => {
+    const time = cleanTime(timings[prayer.apiKey]);
+    const card = document.createElement("article");
+    card.className = "prayer-card";
+    card.id = `prayer-${prayer.apiKey.toLowerCase()}`;
+    card.innerHTML = `
+      <div>
+        <div class="prayer-name">
+          <i class="fa-solid ${prayer.icon}"></i>
+          ${currentLanguage === "bs" ? prayer.bs : prayer.en}
+          <span class="prayer-bosnian">${currentLanguage === "bs" ? prayer.en : prayer.bs}</span>
+        </div>
+      </div>
+      <div class="prayer-time">${time}</div>
+      <div class="prayer-arabic">${prayer.ar}</div>
+    `;
+    container.appendChild(card);
   });
 
-  console.log(`Created ${prayerCount} prayer cards`);
-
-  // Update highlighting
   updatePrayerHighlight();
 }
 
-// ==========================================
-// HIGHLIGHT NEXT PRAYER
-// ==========================================
-
 function updatePrayerHighlight() {
-  if (!currentPrayerTimes) {
-    console.log("No prayer times to highlight");
-    return;
-  }
+  if (!currentPrayerTimes) return;
 
-  console.log("=== UPDATING PRAYER HIGHLIGHT ===");
-
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const currentTimeString = `${hours}:${minutes}`;
-
-  console.log("Current time:", currentTimeString);
-
-  const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-  let nextPrayer = null;
-  let nextPrayerTime = null;
-
-  // Remove active class from all cards
   document.querySelectorAll(".prayer-card").forEach((card) => {
     card.classList.remove("active");
+    card.querySelector(".prayer-countdown")?.remove();
   });
 
-  // Find next prayer
-  for (let prayer of prayers) {
-    const prayerTime = currentPrayerTimes[prayer];
-
-    if (prayerTime && prayerTime > currentTimeString) {
-      nextPrayer = prayer;
-      nextPrayerTime = prayerTime;
-      console.log("Next prayer found:", prayer, "at", prayerTime);
-      break;
-    }
-  }
-
-  // If no prayer found today, next is Fajr
-  if (!nextPrayer) {
-    nextPrayer = "Fajr";
-    nextPrayerTime = currentPrayerTimes["Fajr"];
-    console.log("No more prayers today, next is Fajr tomorrow");
-  }
-
-  // Highlight the next prayer
-  const cardId = `prayer-${nextPrayer.toLowerCase()}`;
-  const nextPrayerCard = document.getElementById(cardId);
-
-  console.log("Looking for element with id:", cardId);
-  console.log("Found:", !!nextPrayerCard);
-
-  if (nextPrayerCard) {
-    nextPrayerCard.classList.add("active");
-
-    // Add countdown
-    const countdown = calculateCountdown(nextPrayerTime);
-    let countdownEl = nextPrayerCard.querySelector(".prayer-countdown");
-
-    if (countdownEl) {
-      countdownEl.textContent = `Next in ${countdown}`;
-    } else {
-      countdownEl = document.createElement("div");
-      countdownEl.className = "prayer-countdown";
-      countdownEl.textContent = `Next in ${countdown}`;
-      nextPrayerCard.appendChild(countdownEl);
-    }
-
-    console.log("Highlighted:", nextPrayer);
-  }
-}
-
-function calculateCountdown(timeString) {
-  const [hours, minutes] = timeString.split(":").map(Number);
-  const prayerTime = new Date();
-  prayerTime.setHours(hours, minutes, 0);
-
-  // If prayer time has passed, it's tomorrow
-  if (prayerTime < new Date()) {
-    prayerTime.setDate(prayerTime.getDate() + 1);
-  }
-
   const now = new Date();
-  const diff = prayerTime - now;
+  const nextPrayer = prayerItems
+    .filter((prayer) => prayer.apiKey !== "Sunrise")
+    .map((prayer) => ({ ...prayer, time: cleanTime(currentPrayerTimes[prayer.apiKey]) }))
+    .find((prayer) => toToday(prayer.time) > now) || {
+      ...prayerItems[0],
+      time: cleanTime(currentPrayerTimes.Fajr),
+      tomorrow: true,
+    };
 
-  const hours_left = Math.floor(diff / (1000 * 60 * 60));
-  const minutes_left = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-  if (hours_left > 0) {
-    return `${hours_left}h ${minutes_left}m`;
-  } else if (minutes_left > 0) {
-    return `${minutes_left}m ${seconds}s`;
-  } else {
-    return `${seconds}s`;
-  }
+  const card = document.getElementById(`prayer-${nextPrayer.apiKey.toLowerCase()}`);
+  if (!card) return;
+  card.classList.add("active");
+  card.dataset.nextLabel = t("next");
+  const countdown = document.createElement("div");
+  countdown.className = "prayer-countdown";
+  countdown.textContent = `${t("nextIn")} ${calculateCountdown(nextPrayer.time, nextPrayer.tomorrow)}`;
+  card.appendChild(countdown);
 }
 
-// ==========================================
-// ISLAMIC DATE
-// ==========================================
-
-function displayIslamicDate(hijriDate) {
-  if (!hijriDate) return;
-
-  console.log("Islamic date:", hijriDate);
-
-  const islamicMonths = [
-    "Muharram",
-    "Safar",
-    "Rabi' al-Awwal",
-    "Rabi' al-Thani",
-    "Jumada al-Awwal",
-    "Jumada al-Thani",
-    "Rajab",
-    "Sha'ban",
-    "Ramadan",
-    "Shawwal",
-    "Dhu al-Qi'dah",
-    "Dhu al-Hijjah",
-  ];
-
-  const islamicMonthsAr = [
-    "محرم",
-    "صفر",
-    "ربيع الأول",
-    "ربيع الثاني",
-    "جمادى الأولى",
-    "جمادى الثانية",
-    "رجب",
-    "شعبان",
-    "رمضان",
-    "شوال",
-    "ذو القعدة",
-    "ذو الحجة",
-  ];
-
-  const month = islamicMonths[hijriDate.month.number - 1];
-  const monthAr = islamicMonthsAr[hijriDate.month.number - 1];
+function displayIslamicDate(hijriDate, gregorianDate) {
   const container = document.getElementById("islamicDateContainer");
+  const month = islamicMonths[Number(hijriDate.month.number) - 1];
+  const gregorian = gregorianDate?.date || new Intl.DateTimeFormat("en-GB").format(new Date());
+  const hijriMain = currentLanguage === "bs"
+    ? `${hijriDate.day}. ${month.bs} ${hijriDate.year}. h.g.`
+    : `${hijriDate.day} ${month.en} ${hijriDate.year} AH`;
 
-  if (container) {
-    container.innerHTML = `
-      <h3><i class='fas fa-moon'></i> Islamic Calendar</h3>
-      <p>${hijriDate.day} ${month} ${hijriDate.year} AH</p>
-      <p>${hijriDate.day} ${monthAr} ${hijriDate.year} هـ</p>
-    `;
-  }
+  document.getElementById("heroHijriDate").textContent = hijriMain;
+
+  container.innerHTML = `
+    <div class="date-column featured-date">
+      <span>${currentLanguage === "bs" ? "Danas" : "Today"}</span>
+      <strong>${hijriMain}</strong>
+    </div>
+    <div class="date-column">
+      <span>English</span>
+      <strong>${hijriDate.day} ${month.en} ${hijriDate.year} AH</strong>
+    </div>
+    <div class="date-column">
+      <span>Bosanski</span>
+      <strong>${hijriDate.day}. ${month.bs} ${hijriDate.year}. h.g.</strong>
+    </div>
+    <div class="date-column">
+      <span>Arabic</span>
+      <strong class="hijri-arabic">${hijriDate.day} ${month.ar} ${hijriDate.year} \u0647\u0640</strong>
+    </div>
+    <div class="date-column">
+      <span>Gregorian</span>
+      <strong>${gregorian}</strong>
+    </div>
+  `;
 }
 
-// ==========================================
-// HADITH FUNCTIONS
-// ==========================================
+function displayImportantDays(hijriDate = currentIslamicDate) {
+  const container = document.getElementById("importantDaysContainer");
+  const cards = importantDays.map((day) => {
+    const month = islamicMonths[day.month - 1];
+    const estimate = hijriDate ? estimateGregorianDate(day, hijriDate) : t("afterLoad");
+    return `
+      <article class="day-card">
+        <span>${day.day} ${currentLanguage === "bs" ? month.bs : month.en}</span>
+        <strong>${currentLanguage === "bs" ? day.bs : day.en}</strong>
+        <p>${currentLanguage === "bs" ? day.noteBs : day.noteEn}</p>
+        <small>${currentLanguage === "bs" ? day.en : day.bs}</small>
+        <div class="day-date">${estimate}</div>
+      </article>
+    `;
+  });
+  container.innerHTML = cards.join("");
+}
+
+function estimateGregorianDate(target, hijriDate) {
+  const currentMonth = Number(hijriDate.month.number);
+  const currentDay = Number(hijriDate.day);
+  let delta = (target.month - currentMonth) * 29.53059 + (target.day - currentDay);
+  if (delta < 0) delta += 354.367;
+  const date = new Date();
+  date.setDate(date.getDate() + Math.round(delta));
+  const locale = currentLanguage === "bs" ? "bs-BA" : "en-GB";
+  return `${t("approx")} ${new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date)}`;
+}
 
 function displayHadithOfDay() {
-  const hadith = getHadithOfDay();
-  displayHadith(hadith);
+  displayHadith(getHadithOfDay());
 }
 
 function displayHadith(hadith) {
-  const englishEl = document.getElementById("hadithEnglish");
-  const arabicEl = document.getElementById("hadithArabic");
-  const bosnianEl = document.getElementById("hadithBosnian");
-
-  if (englishEl) englishEl.textContent = hadith.english;
-  if (arabicEl) arabicEl.textContent = hadith.arabic;
-  if (bosnianEl) bosnianEl.textContent = hadith.bosnian;
-
-  // Update current hadith index
-  currentHadithIndex = hadithData.findIndex((h) => h.id === hadith.id);
+  document.getElementById("hadithEnglish").textContent = hadith.english;
+  document.getElementById("hadithArabic").textContent = hadith.arabic;
+  document.getElementById("hadithBosnian").textContent = hadith.bosnian;
+  currentHadithIndex = hadithData.findIndex((item) => item.id === hadith.id);
 }
 
 function nextHadith() {
@@ -521,116 +499,79 @@ function nextHadith() {
 }
 
 function previousHadith() {
-  currentHadithIndex =
-    (currentHadithIndex - 1 + hadithData.length) % hadithData.length;
+  currentHadithIndex = (currentHadithIndex - 1 + hadithData.length) % hadithData.length;
   displayHadith(hadithData[currentHadithIndex]);
 }
 
 function randomHadith() {
-  const randomIndex = Math.floor(Math.random() * hadithData.length);
-  currentHadithIndex = randomIndex;
-  displayHadith(hadithData[randomIndex]);
+  currentHadithIndex = Math.floor(Math.random() * hadithData.length);
+  displayHadith(hadithData[currentHadithIndex]);
 }
 
-// ==========================================
-// UI FUNCTIONS
-// ==========================================
+function setLocationName(name) {
+  document.getElementById("locationName").innerHTML = `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(name)}`;
+}
+
+function formatPlaceName(result) {
+  const address = result.address || {};
+  const city = address.city || address.town || address.village || address.municipality || result.name || "Selected location";
+  const country = address.country || "";
+  const place = country ? `${city}, ${country}` : city;
+  return sanitizePlaceName(place);
+}
+
+function cleanTime(value) {
+  return String(value || "--:--").split(" ")[0];
+}
+
+function toToday(timeString) {
+  const [hours, minutes] = timeString.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+}
+
+function calculateCountdown(timeString, tomorrow = false) {
+  const target = toToday(timeString);
+  if (tomorrow || target < new Date()) target.setDate(target.getDate() + 1);
+  const diff = Math.max(0, target - new Date());
+  const hours = Math.floor(diff / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
 
 function showLoading(show) {
   const spinner = document.getElementById("loadingSpinner");
-  if (spinner) {
-    spinner.style.display = show ? "block" : "none";
-  }
+  spinner.style.display = show ? "block" : "none";
 }
 
 function showError(message) {
-  console.error("Error:", message);
   const container = document.getElementById("prayerTimesContainer");
-
-  if (!container) return;
-
-  const errorDiv = document.createElement("div");
-  errorDiv.className = "error";
-  errorDiv.textContent = message;
-
-  // Remove previous errors
-  const previousErrors = container.querySelectorAll(".error");
-  previousErrors.forEach((err) => err.remove());
-
-  container.insertBefore(errorDiv, container.firstChild);
-
-  // Auto remove error after 5 seconds
-  setTimeout(() => {
-    if (errorDiv.parentNode) {
-      errorDiv.remove();
-    }
-  }, 5000);
+  container.querySelectorAll(".error").forEach((error) => error.remove());
+  const error = document.createElement("div");
+  error.className = "error";
+  error.textContent = message;
+  container.prepend(error);
 }
 
-// ==========================================
-// GEOLOCATION
-// ==========================================
-
-function attemptGeolocation() {
-  if (!navigator.geolocation) {
-    console.log("Geolocation not supported");
-    document.getElementById("locationName").innerHTML =
-      "<i class='fas fa-location-dot'></i> Sarajevo";
-    return;
-  }
-
-  console.log("Attempting to get user location...");
-
-  const timeoutId = setTimeout(() => {
-    console.log("Geolocation timeout");
-    document.getElementById("locationName").innerHTML =
-      "<i class='fas fa-location-dot'></i> Sarajevo";
-  }, 8000);
-
-  navigator.geolocation.getCurrentPosition(
-    function (position) {
-      clearTimeout(timeoutId);
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      currentCoordinates = { latitude: lat, longitude: lng };
-      console.log("Got user position:", lat, lng);
-      fetchPrayerTimes(lat, lng);
-      reverseGeocode(lat, lng);
-    },
-    function (error) {
-      clearTimeout(timeoutId);
-      console.log("Geolocation failed:", error.message);
-      document.getElementById("locationName").innerHTML =
-        "<i class='fas fa-location-dot'></i> Sarajevo";
-    },
-    {
-      timeout: 7000,
-      enableHighAccuracy: false,
-    },
-  );
+function t(key) {
+  return i18n[currentLanguage]?.[key] || i18n.en[key] || key;
 }
 
-// ==========================================
-// UTILITY FUNCTIONS
-// ==========================================
-
-let lastDate = new Date().toDateString();
-function isNewDay() {
-  const today = new Date().toDateString();
-  if (today !== lastDate) {
-    lastDate = today;
-    return true;
-  }
-  return false;
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-// Keyboard shortcuts
-document.addEventListener("keydown", function (event) {
-  if (event.key === "ArrowRight") {
-    nextHadith();
-  } else if (event.key === "ArrowLeft") {
-    previousHadith();
+function sanitizePlaceName(value) {
+  const text = String(value || "Selected location").trim();
+  const blocked = ["fuck", "nazi", "hitler", "shit", "bitch"];
+  if (blocked.some((word) => text.toLowerCase().includes(word))) {
+    return "Selected location";
   }
-});
-
-console.log("Script loaded successfully!");
+  return text;
+}
